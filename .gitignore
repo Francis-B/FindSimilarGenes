@@ -1,0 +1,6 @@
+data/*.fa
+data/*.pkl
+scripts/utils/__pycache__/**
+data/*gff3
+.snakemake/**
+*.ipynb
