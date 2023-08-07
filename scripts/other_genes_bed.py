@@ -48,7 +48,7 @@ other_genes_lines = []
 with open(INBED, 'r', encoding='utf-8') as bed:
     for line in bed:
         name, type_ = line.split('\t')[3].split('::')
-        length = int(line.split('\t')[2]) - int(line.split('\t')[1])
+        length = int(line.split('\t')[2])+1 - int(line.split('\t')[1])
         # If the line is not about a gene in list
         if not bool(pattern.search(name)):
             other_genes_lines.append(line)

@@ -47,7 +47,7 @@ interest_lines = []    # List to store lines about cancer related genes
 with open(INBED, 'r', encoding='utf-8') as bed:
     for line in bed:
         name, type_ = line.split('\t')[3].split('::')
-        length = int(line.split('\t')[2]) - int(line.split('\t')[1])
+        length = int(line.split('\t')[2])+1 - int(line.split('\t')[1])
         # If the line is about a gene in list
         if bool(pattern.search(name)):
             interest_lines.append(line)   # Add line to bed file
