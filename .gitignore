@@ -1,5 +1,7 @@
-data/*.fa
-data/*.pkl
+data/*.fa*
+data/*.bed
+dasta/*NO_TRANSCRIPT.txt
+data/*.json
 scripts/utils/__pycache__/**
 data/*gff3
 .snakemake/**
