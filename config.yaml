@@ -10,6 +10,5 @@ annotation_url:
 
 fasta_url:
   https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_43/GRCh38.p13.genome.fa.gz
-
-# Change to false if an excel sheet which compares similar genes' features is not needed
-compare_similar_genes: true
+  
+...

@@ -1,6 +1,7 @@
 data/*.fa*
 data/*.bed
-dasta/*NO_TRANSCRIPT.txt
+data/*NO_TRANSCRIPT.txt
+data/*.xlsx
 data/*.json
 scripts/utils/__pycache__/**
 data/*gff3

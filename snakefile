@@ -30,7 +30,19 @@ wildcard_constraints:
 rule all:
     input:
         expand('data/{genes_list}.fa', genes_list = lists),
-        expand('data/{genes_list}_similar.fa', genes_list=lists)
+        expand('data/{genes_list}_similar.fa', genes_list=lists),
+        'data/Similar_Genes_Features.xlsx'
+
+rule write_features_to_excel:
+    """ Write an excel file to compare features of similar genes pairs. """
+    input:
+        gene_pairs = expand('data/{list_name}_gene_pairs.json', list_name=lists),
+        interest_features = expand('data/{list_name}_FEATURES.pkl', list_name=lists),
+        other_features = 'data/other_genes_FEATURES.pkl'
+    output:
+        excel = 'data/Similar_Genes_Features.xlsx'
+    script:
+        'scripts/features_to_excel.py'
 
 
 rule get_regions_sequences:

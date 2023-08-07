@@ -35,7 +35,8 @@ trie.add_list(genes)
 pattern = re.compile(f'^({trie.pattern()})($|-[0-9])')
 
 # Initiate dict to store the length of each regions of genes-of-interest
-transcript_features = {gene: np.zeros(4, dtype=int) for gene in genes}
+transcript_features = {gene: {'length': np.zeros(4, dtype=int), 'number': np.zeros(4, dtype=int)} 
+                       for gene in genes}
 features_idx = {'introns': 0,
                 'CDSs': 1,
                 'five_prime_UTRs': 2,
@@ -51,7 +52,8 @@ with open(INBED, 'r', encoding='utf-8') as bed:
         if bool(pattern.search(name)):
             interest_lines.append(line)   # Add line to bed file
             # Update transcript features
-            transcript_features[name][features_idx[f'{type_}s']] += length
+            transcript_features[name]['length'][features_idx[f'{type_}s']] += length
+            transcript_features[name]['number'][features_idx[f'{type_}s']] += 1
 
 
 # Write a list of genes with no transcript found in annotation

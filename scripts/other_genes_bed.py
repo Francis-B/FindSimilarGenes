@@ -8,6 +8,7 @@ of genes of interest.
 """
 import pickle
 import re
+import copy
 import numpy as np
 
 from utils.trie import Trie
@@ -36,6 +37,7 @@ pattern = re.compile(f'^({trie.pattern()})($|-[0-9])')
 
 # Initiate list to store the canonical transcript of each gene
 transcript_features = {}
+result_dict = {'length': np.zeros(4, dtype=int), 'number': np.zeros(4, dtype=int)}
 features_idx = {'introns': 0,
                 'CDSs': 1, 
                 'five_prime_UTRs': 2,
@@ -51,8 +53,9 @@ with open(INBED, 'r', encoding='utf-8') as bed:
         if not bool(pattern.search(name)):
             other_genes_lines.append(line)
             # Update transcript features
-            transcript_features.setdefault(name, np.zeros(4, dtype=int))
-            transcript_features[name][features_idx[f'{type_}s']] += length
+            transcript_features.setdefault(name, copy.deepcopy(result_dict))
+            transcript_features[name]['length'][features_idx[f'{type_}s']] += length
+            transcript_features[name]['number'][features_idx[f'{type_}s']] += 1
 
 
 # Write bed file with all longest transcripts
