@@ -7,6 +7,7 @@ Find the most similar not cancer related gene for each cancer related gene.
 
 import re
 import pickle
+import json
 import numpy as np
 
 from utils.trie import Trie
@@ -35,7 +36,6 @@ null_features = np.array(list(not_cancer_features.values()))    # features
 
 best_matches = dict.fromkeys(cancer_features_dict.keys())
 
-print('Finding similar genes... This may take few minutes')
 # Loop through cancer related genes to find similar not cancer related genes
 for gene, features in cancer_features_dict.items():
     # Create mask to exclude not-cancer-related genes with regions of length 0 
@@ -64,5 +64,5 @@ with open(SIMILAR_BED, 'w', encoding='utf-8') as f:
     f.writelines(similar_genes)
 
 # Save best_matches dict to pickle file
-with open(GENE_PAIRS, 'wb') as f:
-    pickle.dump(best_matches, f)
+with open(GENE_PAIRS, 'w', encoding='utf-8') as f:
+    json.dump(best_matches, f, indent=0)

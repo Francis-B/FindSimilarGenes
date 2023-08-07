@@ -13,37 +13,36 @@ N.B.2. Because this pipeline uses Bedtools, wget and gzip commands, it must be
 run on a Unix terminal. 
 """
 
-# Name of the .txt file with the genes list. If multiple lists are given, the 
-# pipeline will run seperately for each of them.
-genes_lists = ['Cancer_Genes']
+import os
 
-# Annotation and fasta genome files from gencode. If using custom files, 
-# make sure to change fasta_name and annotation_name
-annotation_url = 'https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_43/gencode.v43.chr_patch_hapl_scaff.annotation.gff3.gz'
-annotation_name = annotation_url.rsplit('/', 1)[-1].rsplit('.', 1)[0]
-fasta_url = 'https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_43/GRCh38.p13.genome.fa.gz'
-fasta_name = fasta_url.rsplit('/', 1)[-1].rsplit('.', 1)[0]
+configfile: "config.yaml"
+
+lists = [os.path.basename(list_).split('.')[0] for list_ in config['lists']]
+annotation_name = config['annotation_url'].rsplit('/', 1)[-1].rsplit('.', 1)[0]
+fasta_name = config['fasta_url'].rsplit('/', 1)[-1].rsplit('.', 1)[0]
+
+wildcard_constraints:
+    list_name = '|'.join(lists),
+    distribution = '|'.join(['', '_similar'])
+
 
 
 rule all:
-    """ List files to get and remove unneccessary files. """
     input:
-        expand('data/{genes_list}.fa', genes_list = genes_lists),
-        expand('data/{genes_list}_similar.fa', genes_list=genes_lists)
-    shell: 
-        """ rm data/*.fai data/*.bed data/*FEATURES.pkl"""
+        expand('data/{genes_list}.fa', genes_list = lists),
+        expand('data/{genes_list}_similar.fa', genes_list=lists)
+
 
 rule get_regions_sequences:
     """ Use the genome fasta file and the precedently created bed files to retrieve
         the sequences of all genes of interest and similar genes. """
     input:
-        bed = 'data/{list_name}{distribution, .*}.bed',
+        bed = 'data/{list_name}{distribution}.bed',
         fasta = f'data/{fasta_name}'
     output:
         sequences = 'data/{list_name}{distribution}.fa'
     run:
         shell("bedtools getfasta -fi {input.fasta} -bed {input.bed} -name -s | fold -w 60 > {output.sequences}"),
-        # shell("rm {input.bed}")
 
 
 rule find_similar_gene:
@@ -56,7 +55,7 @@ rule find_similar_gene:
         interest_features = 'data/{list_name}_FEATURES.pkl'
     output:
         similar = 'data/{list_name}_similar.bed',
-        gene_pairs = 'data/{list_name}_gene_pairs.pkl'
+        gene_pairs = 'data/{list_name}_gene_pairs.json'
     script:
         'scripts/find_similar_gene.py'
 
@@ -66,11 +65,11 @@ rule create_other_genes_bedfile:
         in the given genes list. If multiple lists are given, all list are merged
         together for this rule.  """
     input:
-        genes_lists = expand('data/{list_name}.txt', list_name = genes_lists),
+        genes_lists = expand('data/{list_name}.txt', list_name = lists),
         bed = 'data/all_canonical_transcripts.bed'
     output:
-        bed = 'data/other_genes.bed',
-        features = 'data/other_genes_FEATURES.pkl'
+        bed = temp('data/other_genes.bed'),
+        features = temp('data/other_genes_FEATURES.pkl')
     script:
         'scripts/other_genes_bed.py'
 
@@ -82,8 +81,8 @@ rule create_genes_of_interest_bedfiles:
         genes = 'data/{list_name}.txt',
         bed = 'data/all_canonical_transcripts.bed'
     output:
-        bed = 'data/{list_name}.bed',
-        features = 'data/{list_name}_FEATURES.pkl'  # Transcript features
+        bed = temp('data/{list_name}.bed'),
+        features = temp('data/{list_name}_FEATURES.pkl')  # Transcript features
 
     params:
         # List of genes for which no transcript was found in the annotation file
